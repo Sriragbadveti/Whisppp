@@ -1,3 +1,7 @@
+// CHATCONTAINER CODE COMMENTED OUT - NOW USING STREAM CHAT UI COMPONENTS INSTEAD
+// This file is kept for reference but all functionality has been moved to StreamChatPage.jsx
+
+/*
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import { useChatStore } from '../stores/useChatStore'
 import { useAuthStore } from '../stores/useAuthStore'
@@ -278,3 +282,11 @@ function ChatContainer() {
 }
 
 export default ChatContainer
+*/
+
+// Placeholder component to prevent import errors
+function ChatContainer() {
+  return null;
+}
+
+export default ChatContainer;

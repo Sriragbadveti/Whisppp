@@ -6,6 +6,7 @@ import LoginPage from "./pages/LoginPage";
 import { useAuthStore } from "./stores/useAuthStore";
 import LoaderComponent from "./components/LoaderComponent";
 import  { Toaster } from 'react-hot-toast';
+import StreamChatPage from "./pages/StreamChatPage";
 function App() {
   const { authUser, isChecking, checkUser } = useAuthStore();
 
@@ -25,7 +26,7 @@ function App() {
       <div className="absolute bottom-0 -right-4 size-96 bg-cyan-500 opacity-20 blur-[100px]" />
 
       <Routes>
-        <Route path="/" element={authUser ? <ChatPage /> : <Navigate to={"/login"}/>} />
+        <Route path="/" element={authUser ? <StreamChatPage/> : <Navigate to={"/login"}/>} />
         <Route path="/signup" element={!authUser ? <SignupPage /> : <Navigate to={"/"}/>} />
         <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to={"/"}/>} />
       </Routes>

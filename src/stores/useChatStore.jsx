@@ -10,6 +10,7 @@ export const useChatStore = create((set, get) => ({
   isUsersLoading: false,
   isChatsLoading: false,
   messageHandler: null,
+  streamToken:null,
 
   toggleSound: () => {
     localStorage.setItem("isSoundEnabled", !get().isSoundEnabled);
@@ -152,5 +153,22 @@ export const useChatStore = create((set, get) => ({
       socket.off("newMessage", handler);
       set({ messageHandler: null });
     }
+  },
+
+  getStreamToken:async()=>{
+    try {
+      const response = await axiosInstance.get("/chat/stream-token");
+      if (response.data && response.data.streamToken) {
+        set({streamToken: response.data.streamToken});
+      } else {
+        throw new Error("Invalid response from server");
+      }
+    } catch (error) {
+      console.error("Error getting stream token:", error);
+      const errorMessage = error.response?.data?.message || error.message || "Failed to get stream token";
+      toast.error(errorMessage);
+      set({streamToken: null});
+    }
+
   }
 }));

@@ -3,7 +3,8 @@ import ContactList from './ContactList'
 import ChatsList from './ChatsList'
 import ProfileHeader from './ProfileHeader'
 import ActiveTabSwitch from './ActiveTabSwitch'
-import ChatContainer from './ChatContainer'
+// import ChatContainer from './ChatContainer' // Commented out - using Stream Chat UI instead
+import StreamChatPage from './StreamChatPage'
 import NoConversationPlaceHolder from './NoConversationPlaceHolder'
 import { useChatStore } from '../stores/useChatStore'
 
@@ -29,7 +30,9 @@ const ChatPage = () => {
 
             {/* RIGHT SIDE - Chat Container */}
             <div className='flex flex-1 flex-col bg-slate-900/50 backdrop-blur-sm'>
-              {selectedUser ? <ChatContainer/> : <NoConversationPlaceHolder />}
+              {/* {selectedUser ? <ChatContainer/> : <NoConversationPlaceHolder />} */}
+              {/* Commented out ChatContainer - using Stream Chat UI instead */}
+              {selectedUser ? <StreamChatPage/> : <NoConversationPlaceHolder />}
             </div>
           </div>
         </div>

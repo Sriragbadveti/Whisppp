@@ -3,6 +3,7 @@ import { axiosInstance } from "../lib/axios.instance";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 const BASE_URL = import.meta.env.VITE_API_URL || "https://whisppp-backend.onrender.com";
+import { StreamChat } from "stream-chat";
 export const useAuthStore = create((set, get) => ({
   authUser: null,
   isChecking: true,
@@ -34,6 +35,7 @@ export const useAuthStore = create((set, get) => ({
       // Refresh auth state to trigger navigation
       await get().checkUser();
       get().connectSocket();
+    
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
@@ -128,4 +130,7 @@ export const useAuthStore = create((set, get) => ({
       set({ socket: null });
     }
   },
+
+
+  
 }));
