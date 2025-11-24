@@ -3,15 +3,15 @@ import { MessageCircle, Users } from 'lucide-react'
 
 function ActiveTabSwitch({ activeTab, setActiveTab }) {
   return (
-    <div className="p-4 border-b border-slate-700/50">
-      <div className="flex gap-2 bg-slate-900/50 rounded-lg p-1">
+    <div className="p-4 border-b border-gray-200 bg-white">
+      <div className="flex gap-2 bg-gray-100 rounded-lg p-1">
         {/* Chats Button */}
         <button
           onClick={() => setActiveTab("chats")}
           className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-all duration-200 ${
             activeTab === "chats"
               ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/25"
-              : "text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
+              : "text-gray-600 hover:text-gray-900 hover:bg-white"
           }`}
         >
           <MessageCircle className="w-4 h-4" />
@@ -24,7 +24,7 @@ function ActiveTabSwitch({ activeTab, setActiveTab }) {
           className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-all duration-200 ${
             activeTab === "contacts"
               ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/25"
-              : "text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
+              : "text-gray-600 hover:text-gray-900 hover:bg-white"
           }`}
         >
           <Users className="w-4 h-4" />

@@ -2,7 +2,35 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios.instance";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
-const BASE_URL = import.meta.env.VITE_API_URL || "https://whisppp-backend.onrender.com";
+// Use localhost for development, production URL for production
+const getBaseURL = () => {
+    // If VITE_API_URL is explicitly set, use it
+    if (import.meta.env.VITE_API_URL) {
+        console.log("Using VITE_API_URL:", import.meta.env.VITE_API_URL);
+        return import.meta.env.VITE_API_URL;
+    }
+    
+    // Check if we're in development mode or on localhost
+    const isLocalhost = typeof window !== 'undefined' && 
+                       (window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' ||
+                        window.location.hostname === '');
+    
+    const isDev = import.meta.env.DEV || import.meta.env.MODE === 'development';
+    
+    if (isDev || isLocalhost) {
+        const localURL = "http://localhost:3000";
+        console.log("Development mode detected, using localhost:", localURL);
+        return localURL;
+    }
+    
+    // In production, use production backend
+    const prodURL = "https://whisppp-backend.onrender.com";
+    console.log("Production mode, using:", prodURL);
+    return prodURL;
+};
+
+const BASE_URL = getBaseURL();
 import { StreamChat } from "stream-chat";
 export const useAuthStore = create((set, get) => ({
   authUser: null,

@@ -48,20 +48,27 @@ function StreamChatPage() {
         const connectUser = async () => {
             try {
                 setIsConnecting(true);
+                console.log("🔌 Connecting user to Stream Chat...");
 
-                // Connect user with token
+                // Ensure user ID is a string and matches token
+                const userId = authUser._id.toString();
+                console.log("🔑 Connecting with user ID:", userId);
+                console.log("🎫 Token received:", streamToken ? "Yes" : "No");
+                
+                // Connect user with token - user ID must match token's user_id
                 await client.connectUser(
                     {
-                        id: authUser._id.toString(),
+                        id: userId,
                         name: authUser.username || 'User',
                         image: authUser.profilePic || undefined,
                     },
                     streamToken
                 );
 
+                console.log("✅ User connected to Stream Chat:", client.userID);
                 setIsConnecting(false);
             } catch (error) {
-                console.error("Error connecting to Stream:", error);
+                console.error("❌ Error connecting to Stream:", error);
                 toast.error("Failed to connect to chat");
                 setIsConnecting(false);
             }
@@ -72,17 +79,41 @@ function StreamChatPage() {
 
     // Create and watch channel when user is selected
     useEffect(() => {
-        if (!client || !authUser || !selectedUser || !streamToken || isConnecting) {
+        console.log("🔍 Channel setup useEffect triggered:", {
+            hasClient: !!client,
+            hasAuthUser: !!authUser,
+            hasSelectedUser: !!selectedUser,
+            selectedUserId: selectedUser?._id,
+            hasStreamToken: !!streamToken,
+            isConnecting,
+            clientUserID: client?.userID
+        });
+        
+        // Wait for client to be connected (userID is set after connectUser)
+        if (!client || !authUser || !selectedUser || !streamToken || isConnecting || !client.userID) {
+            const missing = [];
+            if (!client) missing.push("client");
+            if (!authUser) missing.push("authUser");
+            if (!selectedUser) missing.push("selectedUser");
+            if (!streamToken) missing.push("streamToken");
+            if (isConnecting) missing.push("isConnecting");
+            if (!client?.userID) missing.push("client.userID");
+            
+            console.log("⏸️ Channel setup skipped - missing:", missing.join(", "));
             setChannel(null);
             return;
         }
 
         const setupChannel = async () => {
             try {
+                console.log("📡 Channel setup starting...");
+                
                 // Create channel ID from both user IDs (sorted for consistency)
                 const channelId = [authUser._id.toString(), selectedUser._id.toString()]
                     .sort()
                     .join("-");
+
+                console.log("🆔 Channel ID:", channelId);
 
                 // Create or get channel
                 const newChannel = client.channel("messaging", channelId, {
@@ -90,12 +121,16 @@ function StreamChatPage() {
                     name: `${authUser.username} & ${selectedUser.username}`,
                 });
 
+                console.log("📺 Watching channel...");
                 // Watch the channel
                 await newChannel.watch();
+                console.log("✅ Channel watched successfully");
+                
                 return newChannel;
             } catch (error) {
-                console.error("Error setting up channel:", error);
-                toast.error("Failed to load chat");
+                console.error("❌ Error setting up channel:", error);
+                console.error("Error details:", error.message, error.stack);
+                toast.error("Failed to load chat: " + error.message);
                 return null;
             }
         };
@@ -103,24 +138,71 @@ function StreamChatPage() {
         let isCancelled = false;
         setupChannel().then((newChannel) => {
             if (!isCancelled && newChannel) {
+                console.log("✅ Channel set successfully");
                 setChannel(newChannel);
+            } else if (isCancelled) {
+                console.log("🚫 Channel setup cancelled");
+            } else {
+                console.log("⚠️ Channel setup returned null");
             }
+        }).catch((error) => {
+            console.error("❌ Channel setup promise rejected:", error);
         });
 
         // Cleanup: stop watching channel when selectedUser changes
         return () => {
+            console.log("🧹 Cleaning up channel...");
             isCancelled = true;
+            if (channel) {
+                channel.stopWatching().catch(console.error);
+            }
             setChannel(null);
         };
     }, [client, authUser, selectedUser, streamToken, isConnecting]);
 
-    // Loading state
-    if (isConnecting || !client || !channel) {
+    // Check if user is selected
+    if (!selectedUser) {
         return (
-            <div className="flex items-center justify-center h-full bg-slate-900/50">
+            <div className="flex items-center justify-center h-full bg-white">
+                <div className="text-center">
+                    <p className="text-gray-600 text-sm">Select a user to start chatting</p>
+                    <p className="text-gray-400 text-xs mt-2">Choose someone from the sidebar</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Loading state - add more detailed checks
+    const isLoading = isConnecting || !client || !channel || !client?.userID;
+    
+    if (isLoading) {
+        let loadingMessage = "Connecting to chat...";
+        if (!client) loadingMessage = "Initializing client...";
+        else if (!client?.userID) loadingMessage = "Connecting user...";
+        else if (!channel) loadingMessage = "Setting up channel...";
+        else if (isConnecting) loadingMessage = "Connecting to Stream...";
+        
+        console.log("🔄 Loading state:", {
+            isConnecting,
+            hasClient: !!client,
+            hasChannel: !!channel,
+            hasSelectedUser: !!selectedUser,
+            selectedUserId: selectedUser?._id,
+            userID: client?.userID,
+            message: loadingMessage
+        });
+        
+        return (
+            <div className="flex items-center justify-center h-full bg-white">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto mb-4"></div>
-                    <p className="text-slate-400 text-sm">Connecting to chat...</p>
+                    <p className="text-gray-600 text-sm">{loadingMessage}</p>
+                    <p className="text-gray-400 text-xs mt-2">
+                        {!client && "Waiting for client..."}
+                        {client && !client.userID && "Waiting for user connection..."}
+                        {client?.userID && !selectedUser && "Waiting for user selection..."}
+                        {client?.userID && selectedUser && !channel && "Setting up channel..."}
+                    </p>
                 </div>
             </div>
         );
@@ -143,41 +225,59 @@ function StreamChatPage() {
         '--message-text-color-own': '#ffffff',
     };
 
-    // Using Stream Chat React UI Components with custom dark theme
+    // Using Stream Chat React UI Components with custom white theme
     return (
-        <div className="h-full bg-slate-900/50">
+        <div className="h-full w-full bg-white overflow-hidden">
             <style>
                 {`
-                    /* Override Stream Chat styles to match your dark theme */
+                    /* Override Stream Chat styles to match white theme */
                     .str-chat {
-                        background: transparent !important;
-                        color: var(--text-high-emphasis) !important;
+                        background: #ffffff !important;
+                        color: #111827 !important;
+                        height: 100% !important;
+                        display: flex !important;
+                        flex-direction: column !important;
                     }
                     
                     .str-chat__channel-header {
-                        background: rgba(30, 41, 59, 0.5) !important;
-                        backdrop-filter: blur(8px);
-                        border-bottom: 1px solid rgba(148, 163, 184, 0.3) !important;
+                        background: #ffffff !important;
+                        border-bottom: 1px solid #e5e7eb !important;
+                        padding: 1rem !important;
                     }
                     
                     .str-chat__channel-header-title {
-                        color: #f1f5f9 !important;
+                        color: #111827 !important;
+                        font-weight: 600 !important;
                     }
                     
                     .str-chat__channel-header-subtitle {
-                        color: #94a3b8 !important;
+                        color: #6b7280 !important;
                     }
                     
                     .str-chat__message-list {
-                        background: transparent !important;
+                        background: #ffffff !important;
+                        flex: 1 !important;
+                        overflow-y: auto !important;
+                        padding: 1rem !important;
                     }
                     
                     .str-chat__message {
                         background: transparent !important;
+                        margin-bottom: 0.75rem !important;
+                    }
+                    
+                    .str-chat__message-simple {
+                        display: flex !important;
+                        align-items: flex-end !important;
+                    }
+                    
+                    .str-chat__message-simple--me {
+                        justify-content: flex-end !important;
                     }
                     
                     .str-chat__message-simple__text {
-                        color: #f1f5f9 !important;
+                        color: #111827 !important;
+                        font-size: 0.875rem !important;
                     }
                     
                     .str-chat__message-simple--me .str-chat__message-simple__text {
@@ -185,41 +285,51 @@ function StreamChatPage() {
                     }
                     
                     .str-chat__message-simple__bubble {
-                        background: #334155 !important;
-                        border-radius: 0.5rem !important;
+                        background: #f3f4f6 !important;
+                        border-radius: 0.75rem !important;
+                        padding: 0.75rem 1rem !important;
+                        max-width: 70% !important;
+                        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+                        border: 1px solid #e5e7eb !important;
                     }
                     
                     .str-chat__message-simple--me .str-chat__message-simple__bubble {
                         background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%) !important;
                         color: #ffffff !important;
+                        border: none !important;
                     }
                     
                     .str-chat__input {
-                        background: rgba(30, 41, 59, 0.5) !important;
-                        backdrop-filter: blur(8px);
-                        border-top: 1px solid rgba(148, 163, 184, 0.3) !important;
+                        background: #ffffff !important;
+                        border-top: 1px solid #e5e7eb !important;
+                        padding: 1rem !important;
                     }
                     
                     .str-chat__input-flat {
-                        background: rgba(51, 65, 85, 0.5) !important;
-                        border: 1px solid rgba(148, 163, 184, 0.3) !important;
+                        background: #f9fafb !important;
+                        border: 1px solid #e5e7eb !important;
                         border-radius: 0.5rem !important;
-                        color: #f1f5f9 !important;
+                        color: #111827 !important;
+                        padding: 0.75rem 1rem !important;
+                        font-size: 0.875rem !important;
                     }
                     
                     .str-chat__input-flat:focus {
-                        border-color: rgba(6, 182, 212, 0.5) !important;
+                        border-color: #06b6d4 !important;
                         outline: none !important;
-                        box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2) !important;
+                        box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1) !important;
+                        background: #ffffff !important;
                     }
                     
                     .str-chat__input-flat::placeholder {
-                        color: #64748b !important;
+                        color: #9ca3af !important;
                     }
                     
                     .str-chat__send-button {
                         background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%) !important;
                         border-radius: 0.5rem !important;
+                        padding: 0.5rem 1rem !important;
+                        transition: opacity 0.2s !important;
                     }
                     
                     .str-chat__send-button:hover {
@@ -228,41 +338,81 @@ function StreamChatPage() {
                     
                     .str-chat__send-button:disabled {
                         opacity: 0.5 !important;
+                        cursor: not-allowed !important;
                     }
                     
                     .str-chat__message-attachment {
-                        border-radius: 0.5rem !important;
+                        border-radius: 0.75rem !important;
+                        overflow: hidden !important;
+                        margin-top: 0.5rem !important;
                     }
                     
                     .str-chat__message-attachment-img {
-                        border-radius: 0.5rem !important;
+                        border-radius: 0.75rem !important;
+                        max-width: 100% !important;
                     }
                     
                     /* Scrollbar styling */
-                    .str-chat__message-list-scroll {
+                    .str-chat__message-list-scroll,
+                    .str-chat__message-list {
                         scrollbar-width: thin;
-                        scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+                        scrollbar-color: #d1d5db transparent;
                     }
                     
-                    .str-chat__message-list-scroll::-webkit-scrollbar {
+                    .str-chat__message-list-scroll::-webkit-scrollbar,
+                    .str-chat__message-list::-webkit-scrollbar {
                         width: 6px;
                     }
                     
-                    .str-chat__message-list-scroll::-webkit-scrollbar-track {
+                    .str-chat__message-list-scroll::-webkit-scrollbar-track,
+                    .str-chat__message-list::-webkit-scrollbar-track {
                         background: transparent;
                     }
                     
-                    .str-chat__message-list-scroll::-webkit-scrollbar-thumb {
-                        background: rgba(148, 163, 184, 0.3);
+                    .str-chat__message-list-scroll::-webkit-scrollbar-thumb,
+                    .str-chat__message-list::-webkit-scrollbar-thumb {
+                        background: #d1d5db;
                         border-radius: 3px;
                     }
                     
-                    .str-chat__message-list-scroll::-webkit-scrollbar-thumb:hover {
-                        background: rgba(148, 163, 184, 0.5);
+                    .str-chat__message-list-scroll::-webkit-scrollbar-thumb:hover,
+                    .str-chat__message-list::-webkit-scrollbar-thumb:hover {
+                        background: #9ca3af;
+                    }
+                    
+                    /* Avatar styling */
+                    .str-chat__avatar {
+                        border-radius: 50% !important;
+                    }
+                    
+                    .str-chat__avatar-image {
+                        border-radius: 50% !important;
+                    }
+                    
+                    /* Thread styling */
+                    .str-chat__thread {
+                        background: #f9fafb !important;
+                        border-left: 1px solid #e5e7eb !important;
+                    }
+                    
+                    /* Loading states */
+                    .str-chat__loading-indicator {
+                        color: #06b6d4 !important;
+                    }
+                    
+                    /* Date separators */
+                    .str-chat__date-separator {
+                        color: #6b7280 !important;
+                    }
+                    
+                    /* Message reactions */
+                    .str-chat__message-reactions-list {
+                        background: #f9fafb !important;
+                        border: 1px solid #e5e7eb !important;
                     }
                 `}
             </style>
-            <Chat client={client} theme="messaging dark">
+            <Chat client={client} theme="messaging light">
                 <Channel channel={channel}>
                     <Window>
                         <ChannelHeader />
