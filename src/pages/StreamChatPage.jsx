@@ -4,11 +4,14 @@ import { Chat, Channel, Window, ChannelHeader, MessageList, MessageInput, Thread
 import 'stream-chat-react/dist/css/v2/index.css';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useChatStore } from '../stores/useChatStore';
+import { Video } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 function StreamChatPage() {
     const { authUser } = useAuthStore();
     const { selectedUser, getStreamToken, streamToken } = useChatStore();
+    const navigate = useNavigate();
     
     const [client, setClient] = useState(null);
     const [channel, setChannel] = useState(null);
@@ -116,6 +119,22 @@ function StreamChatPage() {
             setChannel(null);
         };
     }, [client, authUser, selectedUser, streamToken, isConnecting]);
+
+    // Handle video call - navigate to video call route
+    const handleStartVideoCall = () => {
+        if (!authUser || !selectedUser) {
+            toast.error("Please select a user to start a video call");
+            return;
+        }
+        
+        // Create call ID from both user IDs (sorted for consistency)
+        const videoCallId = [authUser._id.toString(), selectedUser._id.toString()]
+            .sort()
+            .join("-video");
+        
+        // Navigate to video call route
+        navigate(`/video-call/${videoCallId}`);
+    };
 
     // Check if user is selected
     if (!selectedUser) {
@@ -362,7 +381,19 @@ function StreamChatPage() {
             <Chat client={client} theme="messaging light">
                 <Channel channel={channel}>
                     <Window>
-                        <ChannelHeader />
+                        <div className="relative">
+                            <div className="absolute top-2 right-2 z-10">
+                                <button
+                                    onClick={handleStartVideoCall}
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:opacity-90 transition-opacity shadow-md hover:shadow-lg text-sm"
+                                    title="Start video call"
+                                >
+                                    <Video className="w-4 h-4" />
+                                    <span className="font-medium">Video</span>
+                                </button>
+                            </div>
+                            <ChannelHeader />
+                        </div>
                         <MessageList />
                         <MessageInput />
                     </Window>

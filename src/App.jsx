@@ -1,19 +1,32 @@
 import React, { useEffect } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import ChatPage from "./pages/ChatPage";
 import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
+import StreamVideoCallingPage from "./pages/StreamVideoCallingPage";
 import { useAuthStore } from "./stores/useAuthStore";
 import LoaderComponent from "./components/LoaderComponent";
 import  { Toaster } from 'react-hot-toast';
+import { useNavigate } from "react-router-dom";
+
+// Wrapper component to extract callId from route params
+function StreamVideoCallingPageWrapper() {
+  const { callId } = useParams();
+  const navigate = useNavigate();
+  
+  const handleLeave = () => {
+    navigate('/');
+  };
+  
+  return <StreamVideoCallingPage callId={callId} onLeave={handleLeave} />;
+}
+
 function App() {
   const { authUser, isChecking, checkUser } = useAuthStore();
 
   useEffect(() => {
     checkUser();
   }, [checkUser]);
-
-  console.log(authUser);
 
   if(isChecking) return <LoaderComponent/>
 
@@ -32,6 +45,7 @@ function App() {
         <Route path="/" element={authUser ? <ChatPage /> : <Navigate to={"/login"}/>} />
         <Route path="/signup" element={!authUser ? <SignupPage /> : <Navigate to={"/"}/>} />
         <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to={"/"}/>} />
+        <Route path="/video-call/:callId" element={authUser ? <StreamVideoCallingPageWrapper /> : <Navigate to={"/login"}/>} />
       </Routes>
 
       <Toaster />
