@@ -151,7 +151,7 @@ function ChatContainer() {
               <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-800"></div>
             )}
           </div>
-          <div>
+    <div>
             <h3 className="text-white font-semibold text-sm">{selectedUser?.username}</h3>
             <p className="text-slate-400 text-xs">{isSelectedUserOnline ? "Online" : "Offline"}</p>
           </div>

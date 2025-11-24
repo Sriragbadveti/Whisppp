@@ -180,6 +180,6 @@ export const useChatStore = create((set, get) => ({
       toast.error(errorMessage);
       set({streamToken: null});
     }
-
+    
   }
 }));

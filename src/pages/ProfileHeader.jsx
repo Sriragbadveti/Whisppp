@@ -85,7 +85,7 @@ function ProfileHeader() {
           </div>
           
           {/* User Name */}
-          <div>
+    <div>
             <h3 className="text-gray-900 font-semibold text-sm">{authUser?.username || "Username"}</h3>
             <p className="text-gray-500 text-xs">{isOnline ? "Online" : "Offline"}</p>
           </div>

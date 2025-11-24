@@ -16,12 +16,12 @@ const ChatPage = () => {
     <div className='w-full h-screen flex overflow-hidden bg-white'>
       {/* LEFT SIDEBAR */}
       <div className='w-80 bg-gray-50 flex flex-col border-r border-gray-200 flex-shrink-0'>
-        <ProfileHeader/>
+      <ProfileHeader/>
         <ActiveTabSwitch activeTab={activeTab} setActiveTab={setActiveTab}/>
-        
+
         <div className='flex-1 overflow-y-auto p-4 space-y-2' style={{ willChange: 'scroll-position', transform: 'translateZ(0)' }}>
-          {activeTab === "chats" ? <ChatsList/> : <ContactList/>}
-        </div>
+        {activeTab === "chats" ? <ChatsList/> : <ContactList/>}
+      </div>
       </div>
 
       {/* RIGHT SIDE - Chat Container */}

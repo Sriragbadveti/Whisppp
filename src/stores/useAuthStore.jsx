@@ -37,9 +37,9 @@ export const useAuthStore = create((set, get) => ({
   onlineUsers: [],
   socket: null,
 
-  checkUser: async () => {
-    try {
-      const res = await axiosInstance.get("/auth/check");
+    checkUser: async () => {
+        try {
+            const res = await axiosInstance.get("/auth/check");
       set({ authUser: res.data });
       get().connectSocket();
     } catch (error) {
@@ -57,8 +57,8 @@ export const useAuthStore = create((set, get) => ({
       // Refresh auth state to trigger navigation
       await get().checkUser();
       get().connectSocket();
-    
-    } catch (error) {
+            
+        } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       set({ isSignedUp: false });
@@ -77,11 +77,11 @@ export const useAuthStore = create((set, get) => ({
       toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       set({ isLoggedIn: false });
-    }
+        }
   },
 
   logout: async () => {
-    try {
+        try {
       const res = await axiosInstance.post("/auth/logout");
       toast.success("User has been successfully logged out");
       get().disconnectSocket();
@@ -101,7 +101,7 @@ export const useAuthStore = create((set, get) => ({
       });
       set({ authUser: res.data });
       toast.success("Profile picture updated successfullyy");
-    } catch (error) {
+        } catch (error) {
       toast.error(
         error.response?.data?.message || "Failed to update profile picture"
       );
