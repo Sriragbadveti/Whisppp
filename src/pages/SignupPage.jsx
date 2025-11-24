@@ -16,7 +16,7 @@ const SignupPage = () => {
     <div className="w-full min-h-screen flex items-center justify-center bg-white p-4">
       <div className="w-full max-w-md">
         {/* Card Container */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-10">
+        <div className="bg-white rounded-3xl border border-gray-200 shadow-2xl p-10">
           {/* Logo */}
           <div className="text-center mb-10">
             <div className="flex items-center justify-center mb-5">
@@ -51,7 +51,7 @@ const SignupPage = () => {
                   type="text"
                   value={formData.username}
                   onChange={(e) => setformData({...formData, username: e.target.value})}
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 focus:bg-white transition-all duration-200"
+                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 focus:bg-white transition-all duration-200"
                   placeholder="Choose a username"
                 />
               </div>
@@ -70,7 +70,7 @@ const SignupPage = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setformData({...formData, email: e.target.value})}
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 focus:bg-white transition-all duration-200"
+                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 focus:bg-white transition-all duration-200"
                   placeholder="Enter your email"
                 />
               </div>
@@ -89,7 +89,7 @@ const SignupPage = () => {
                   type="password"
                   value={formData.password}
                   onChange={(e) => setformData({...formData, password: e.target.value})}
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 focus:bg-white transition-all duration-200"
+                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 focus:bg-white transition-all duration-200"
                   placeholder="Create a secure password"
                 />
               </div>
@@ -99,7 +99,7 @@ const SignupPage = () => {
             <button
               type="submit"
               disabled={isSignedUp}
-              className="w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md flex items-center justify-center mt-8"
+              className="w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center justify-center mt-8"
             >
               {isSignedUp ? (
                 <LoaderIcon className="w-5 h-5 animate-spin" />
