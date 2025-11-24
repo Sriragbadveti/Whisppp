@@ -13,7 +13,7 @@ const SignupPage = () => {
   }
   
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-white p-4">
+    <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-cyan-50 p-4">
       <div className="w-full max-w-md">
         {/* Card Container */}
         <div className="bg-white rounded-3xl border border-gray-200 shadow-2xl p-10">
