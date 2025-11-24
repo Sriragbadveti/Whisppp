@@ -6,7 +6,6 @@ import { io } from "socket.io-client";
 const getBaseURL = () => {
     // If VITE_API_URL is explicitly set, use it
     if (import.meta.env.VITE_API_URL) {
-        console.log("Using VITE_API_URL:", import.meta.env.VITE_API_URL);
         return import.meta.env.VITE_API_URL;
     }
     
@@ -19,15 +18,11 @@ const getBaseURL = () => {
     const isDev = import.meta.env.DEV || import.meta.env.MODE === 'development';
     
     if (isDev || isLocalhost) {
-        const localURL = "http://localhost:3000";
-        console.log("Development mode detected, using localhost:", localURL);
-        return localURL;
+        return "http://localhost:3000";
     }
     
     // In production, use production backend
-    const prodURL = "https://whisppp-backend.onrender.com";
-    console.log("Production mode, using:", prodURL);
-    return prodURL;
+    return "https://whisppp-backend.onrender.com";
 };
 
 const BASE_URL = getBaseURL();
@@ -48,7 +43,6 @@ export const useAuthStore = create((set, get) => ({
       set({ authUser: res.data });
       get().connectSocket();
     } catch (error) {
-      console.log(error);
       set({ authUser: null });
     } finally {
       set({ isChecking: false });
@@ -133,15 +127,15 @@ export const useAuthStore = create((set, get) => ({
     });
 
     newSocket.on("connect", () => {
-      console.log("Socket connected:", newSocket.id);
+      // Socket connected
     });
 
-    newSocket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
+    newSocket.on("connect_error", () => {
+      // Socket connection error
     });
 
     newSocket.on("disconnect", () => {
-      console.log("Socket disconnected");
+      // Socket disconnected
     });
 
     newSocket.on("getAllOnlineUsers", (userIds) => {

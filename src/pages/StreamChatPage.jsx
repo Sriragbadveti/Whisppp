@@ -17,7 +17,6 @@ function StreamChatPage() {
     // Initialize Stream Chat client
     useEffect(() => {
         if (!authUser || !import.meta.env.VITE_STREAM_API_KEY) {
-            console.error("Missing authUser or STREAM_API_KEY");
             return;
         }
 
@@ -27,7 +26,7 @@ function StreamChatPage() {
         return () => {
             // Cleanup: disconnect user when component unmounts
             if (streamClient) {
-                streamClient.disconnectUser().catch(console.error);
+                streamClient.disconnectUser().catch(() => {});
             }
         };
     }, [authUser]);
@@ -35,9 +34,7 @@ function StreamChatPage() {
     // Retrieve stream token when component mounts or authUser changes
     useEffect(() => {
         if (authUser && !streamToken) {
-            getStreamToken().catch((error) => {
-                console.error("Failed to retrieve stream token:", error);
-            });
+            getStreamToken().catch(() => {});
         }
     }, [authUser, streamToken, getStreamToken]);
 
@@ -48,12 +45,9 @@ function StreamChatPage() {
         const connectUser = async () => {
             try {
                 setIsConnecting(true);
-                console.log("🔌 Connecting user to Stream Chat...");
-
+                
                 // Ensure user ID is a string and matches token
                 const userId = authUser._id.toString();
-                console.log("🔑 Connecting with user ID:", userId);
-                console.log("🎫 Token received:", streamToken ? "Yes" : "No");
                 
                 // Connect user with token - user ID must match token's user_id
                 await client.connectUser(
@@ -65,10 +59,8 @@ function StreamChatPage() {
                     streamToken
                 );
 
-                console.log("✅ User connected to Stream Chat:", client.userID);
                 setIsConnecting(false);
             } catch (error) {
-                console.error("❌ Error connecting to Stream:", error);
                 toast.error("Failed to connect to chat");
                 setIsConnecting(false);
             }
@@ -79,41 +71,18 @@ function StreamChatPage() {
 
     // Create and watch channel when user is selected
     useEffect(() => {
-        console.log("🔍 Channel setup useEffect triggered:", {
-            hasClient: !!client,
-            hasAuthUser: !!authUser,
-            hasSelectedUser: !!selectedUser,
-            selectedUserId: selectedUser?._id,
-            hasStreamToken: !!streamToken,
-            isConnecting,
-            clientUserID: client?.userID
-        });
-        
         // Wait for client to be connected (userID is set after connectUser)
         if (!client || !authUser || !selectedUser || !streamToken || isConnecting || !client.userID) {
-            const missing = [];
-            if (!client) missing.push("client");
-            if (!authUser) missing.push("authUser");
-            if (!selectedUser) missing.push("selectedUser");
-            if (!streamToken) missing.push("streamToken");
-            if (isConnecting) missing.push("isConnecting");
-            if (!client?.userID) missing.push("client.userID");
-            
-            console.log("⏸️ Channel setup skipped - missing:", missing.join(", "));
             setChannel(null);
             return;
         }
 
         const setupChannel = async () => {
             try {
-                console.log("📡 Channel setup starting...");
-                
                 // Create channel ID from both user IDs (sorted for consistency)
                 const channelId = [authUser._id.toString(), selectedUser._id.toString()]
                     .sort()
                     .join("-");
-
-                console.log("🆔 Channel ID:", channelId);
 
                 // Create or get channel
                 const newChannel = client.channel("messaging", channelId, {
@@ -121,15 +90,11 @@ function StreamChatPage() {
                     name: `${authUser.username} & ${selectedUser.username}`,
                 });
 
-                console.log("📺 Watching channel...");
                 // Watch the channel
                 await newChannel.watch();
-                console.log("✅ Channel watched successfully");
                 
                 return newChannel;
             } catch (error) {
-                console.error("❌ Error setting up channel:", error);
-                console.error("Error details:", error.message, error.stack);
                 toast.error("Failed to load chat: " + error.message);
                 return null;
             }
@@ -138,23 +103,15 @@ function StreamChatPage() {
         let isCancelled = false;
         setupChannel().then((newChannel) => {
             if (!isCancelled && newChannel) {
-                console.log("✅ Channel set successfully");
                 setChannel(newChannel);
-            } else if (isCancelled) {
-                console.log("🚫 Channel setup cancelled");
-            } else {
-                console.log("⚠️ Channel setup returned null");
             }
-        }).catch((error) => {
-            console.error("❌ Channel setup promise rejected:", error);
-        });
+        }).catch(() => {});
 
         // Cleanup: stop watching channel when selectedUser changes
         return () => {
-            console.log("🧹 Cleaning up channel...");
             isCancelled = true;
             if (channel) {
-                channel.stopWatching().catch(console.error);
+                channel.stopWatching().catch(() => {});
             }
             setChannel(null);
         };
@@ -172,7 +129,7 @@ function StreamChatPage() {
         );
     }
 
-    // Loading state - add more detailed checks
+    // Loading state
     const isLoading = isConnecting || !client || !channel || !client?.userID;
     
     if (isLoading) {
@@ -181,16 +138,6 @@ function StreamChatPage() {
         else if (!client?.userID) loadingMessage = "Connecting user...";
         else if (!channel) loadingMessage = "Setting up channel...";
         else if (isConnecting) loadingMessage = "Connecting to Stream...";
-        
-        console.log("🔄 Loading state:", {
-            isConnecting,
-            hasClient: !!client,
-            hasChannel: !!channel,
-            hasSelectedUser: !!selectedUser,
-            selectedUserId: selectedUser?._id,
-            userID: client?.userID,
-            message: loadingMessage
-        });
         
         return (
             <div className="flex items-center justify-center h-full bg-white">

@@ -41,10 +41,21 @@ export const useChatStore = create((set, get) => ({
     set({ isUsersLoading: true });
 
     try {
-      const res = await axiosInstance.get("/api/chats");
+      // Try Stream Chat channels first, fallback to MongoDB chats
+      const res = await axiosInstance.get("/chat/chats").catch(() => {
+        // Fallback to MongoDB chats if Stream Chat fails
+        return axiosInstance.get("/api/chats");
+      });
       set({ chats: res.data });
     } catch (error) {
-      toast.error(error);
+      // If both fail, try MongoDB as last resort
+      try {
+        const fallbackRes = await axiosInstance.get("/api/chats");
+        set({ chats: fallbackRes.data });
+      } catch (fallbackError) {
+        toast.error("Failed to load chats");
+        set({ chats: [] });
+      }
     } finally {
       set({ isUsersLoading: false });
     }
